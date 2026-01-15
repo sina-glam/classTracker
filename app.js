@@ -36,9 +36,20 @@ const scheduleEndTimeInput = document.getElementById("schedule-end-time");
 const scheduleError = document.getElementById("schedule-error");
 const scheduleModalTitle = document.getElementById("schedule-modal-title");
 const scheduleSubmitButton = document.getElementById("schedule-submit");
+const recordModal = document.getElementById("record-modal");
+const closeRecordModalButton = document.getElementById("close-record-modal");
+const recordForm = document.getElementById("record-form");
+const recordStudentSelect = document.getElementById("record-student");
+const recordDateInput = document.getElementById("record-date");
+const recordHoursInput = document.getElementById("record-hours");
+const recordPriceInput = document.getElementById("record-price");
+const recordError = document.getElementById("record-error");
+const recordModalTitle = document.getElementById("record-modal-title");
+const recordSubmitButton = document.getElementById("record-submit");
 
 const todaySelections = new Map();
 let editingScheduleId = null;
+let editingEntryId = null;
 
 function loadState() {
   const raw = localStorage.getItem(storageKey);
@@ -153,6 +164,54 @@ function closeScheduleModal() {
   scheduleForm.reset();
   scheduleError.textContent = "";
   editingScheduleId = null;
+}
+
+function populateRecordStudentOptions(selectedId, fallbackName) {
+  recordStudentSelect.innerHTML = "";
+  const knownIds = new Set();
+
+  state.students.forEach((student) => {
+    const option = document.createElement("option");
+    option.value = student.id;
+    option.textContent = student.name;
+    option.dataset.name = student.name;
+    if (student.id === selectedId) {
+      option.selected = true;
+    }
+    recordStudentSelect.appendChild(option);
+    knownIds.add(student.id);
+  });
+
+  if (selectedId && !knownIds.has(selectedId)) {
+    const fallbackOption = document.createElement("option");
+    fallbackOption.value = selectedId;
+    fallbackOption.textContent = `${fallbackName || "Unknown Student"} (archived)`;
+    fallbackOption.dataset.name = fallbackName || "Unknown Student";
+    fallbackOption.selected = true;
+    recordStudentSelect.appendChild(fallbackOption);
+  }
+}
+
+function openRecordModal(entry) {
+  editingEntryId = entry.id;
+  recordModalTitle.textContent = "Edit Record";
+  recordSubmitButton.textContent = "Update Record";
+  recordError.textContent = "";
+  populateRecordStudentOptions(entry.studentId, entry.studentName);
+  recordDateInput.value = entry.date;
+  recordHoursInput.value = entry.hours;
+  recordPriceInput.value = entry.hourlyPriceAtThatTime;
+  recordModal.classList.add("is-open");
+  recordModal.setAttribute("aria-hidden", "false");
+  recordStudentSelect.focus();
+}
+
+function closeRecordModal() {
+  recordModal.classList.remove("is-open");
+  recordModal.setAttribute("aria-hidden", "true");
+  recordForm.reset();
+  recordError.textContent = "";
+  editingEntryId = null;
 }
 
 function setActiveTab(tabId) {
@@ -278,11 +337,21 @@ function renderRecords() {
     totalCell.textContent = formatCurrency(entry.totalAmount);
 
     const actionCell = document.createElement("td");
+    const actions = document.createElement("div");
+    actions.className = "table-actions";
+
+    const editButton = document.createElement("button");
+    editButton.className = "ghost";
+    editButton.textContent = "Edit";
+    editButton.addEventListener("click", () => openRecordModal(entry));
+
     const deleteButton = document.createElement("button");
     deleteButton.className = "delete-btn";
     deleteButton.textContent = "Delete";
     deleteButton.addEventListener("click", () => deleteEntry(entry.id));
-    actionCell.appendChild(deleteButton);
+    actions.appendChild(editButton);
+    actions.appendChild(deleteButton);
+    actionCell.appendChild(actions);
 
     row.appendChild(studentCell);
     row.appendChild(dateCell);
@@ -637,6 +706,15 @@ function setupListeners() {
 
   openScheduleButton.addEventListener("click", openScheduleModal);
   closeScheduleModalButton.addEventListener("click", closeScheduleModal);
+  closeRecordModalButton.addEventListener("click", closeRecordModal);
+
+  recordStudentSelect.addEventListener("change", () => {
+    const selectedId = recordStudentSelect.value;
+    const student = state.students.find((entry) => entry.id === selectedId);
+    if (student) {
+      recordPriceInput.value = student.hourlyPrice;
+    }
+  });
 
   scheduleForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -654,6 +732,41 @@ function setupListeners() {
     }
     scheduleError.textContent = "";
     addScheduleEntry(name, day, time, endTime);
+  });
+
+  recordForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!editingEntryId) {
+      return;
+    }
+    const studentId = recordStudentSelect.value;
+    const selectedOption = recordStudentSelect.selectedOptions[0];
+    const studentName = selectedOption?.dataset.name || selectedOption?.textContent || "";
+    const date = recordDateInput.value;
+    const hours = Number.parseFloat(recordHoursInput.value);
+    const price = Number.parseFloat(recordPriceInput.value);
+
+    if (!studentId || !date || Number.isNaN(hours) || hours <= 0 || Number.isNaN(price) || price <= 0) {
+      recordError.textContent = "Please fill out every field with valid values.";
+      return;
+    }
+
+    const entry = state.entries.find((item) => item.id === editingEntryId);
+    if (!entry) {
+      recordError.textContent = "Unable to find that record to update.";
+      return;
+    }
+
+    entry.studentId = studentId;
+    entry.studentName = studentName;
+    entry.date = date;
+    entry.hours = hours;
+    entry.hourlyPriceAtThatTime = price;
+    entry.totalAmount = hours * price;
+
+    saveState();
+    renderAll();
+    closeRecordModal();
   });
 
   reportMonthInput.addEventListener("change", renderReports);

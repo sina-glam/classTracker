@@ -180,6 +180,35 @@
     </div>
   </div>
 
+  <div class="modal" id="record-modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="record-modal-title">Edit Record</h3>
+        <button class="ghost" id="close-record-modal">Close</button>
+      </div>
+      <form id="record-form">
+        <label>
+          Student
+          <select id="record-student" required></select>
+        </label>
+        <label>
+          Date
+          <input type="date" id="record-date" required />
+        </label>
+        <label>
+          Hours
+          <input type="number" id="record-hours" min="0" step="0.5" required />
+        </label>
+        <label>
+          Hourly Price
+          <input type="number" id="record-price" min="0" step="0.01" required />
+        </label>
+        <p class="form-error" id="record-error"></p>
+        <button class="primary" id="record-submit" type="submit">Update Record</button>
+      </form>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
