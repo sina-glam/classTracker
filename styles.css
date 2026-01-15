@@ -405,15 +405,29 @@ select {
   }
 
   .today-controls {
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 8px;
   }
 
   .hour-picker {
-    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .checkbox-row {
     flex: 0 0 auto;
+  }
+
+  .hour-picker button {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .hour-picker::-webkit-scrollbar {
+    display: none;
   }
 }
 
