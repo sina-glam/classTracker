@@ -355,6 +355,9 @@ select {
     font-size: 12px;
     width: 100%;
     padding: 8px 10px;
+    white-space: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .schedule-time {
@@ -373,12 +376,17 @@ select {
   .schedule-actions {
     gap: 6px;
     flex: 0 0 auto;
+    white-space: nowrap;
   }
 
   .schedule-actions .ghost,
   .schedule-actions .delete-btn {
     font-size: 12px;
     padding: 2px 4px;
+  }
+
+  .schedule-item::-webkit-scrollbar {
+    display: none;
   }
 }
 
