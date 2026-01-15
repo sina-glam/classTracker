@@ -62,6 +62,14 @@ function loadState() {
     state.students = parsed.students || [];
     state.entries = parsed.entries || [];
     state.schedule = parsed.schedule || [];
+    state.students.forEach((student) => {
+      if (typeof student.classesBought !== "number") {
+        student.classesBought = 0;
+      }
+      if (typeof student.classesRemaining !== "number") {
+        student.classesRemaining = student.classesBought;
+      }
+    });
   } catch (error) {
     console.error("Failed to load data", error);
   }
@@ -257,7 +265,11 @@ function renderToday() {
 
     const classesBought = document.createElement("span");
     classesBought.className = "student-classes";
-    classesBought.textContent = `Classes: ${student.classesBought ?? 0}`;
+    const totalClasses = Number.isFinite(student.classesBought) ? student.classesBought : 0;
+    const remainingClasses = Number.isFinite(student.classesRemaining)
+      ? student.classesRemaining
+      : totalClasses;
+    classesBought.textContent = `${remainingClasses} of ${totalClasses}`;
 
     const price = document.createElement("span");
     price.textContent = `${formatCurrency(student.hourlyPrice)}/hr`;
@@ -596,6 +608,9 @@ function confirmToday() {
     };
 
     state.entries.push(entry);
+    if (Number.isFinite(student.classesRemaining) && student.classesRemaining > 0) {
+      student.classesRemaining -= 1;
+    }
   });
 
   if (duplicates.length) {
@@ -631,6 +646,7 @@ function addStudent(name, classesBought, price) {
     id: crypto.randomUUID(),
     name,
     classesBought,
+    classesRemaining: classesBought,
     hourlyPrice: price
   });
   saveState();
