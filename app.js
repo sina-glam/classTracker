@@ -21,6 +21,7 @@ const studentModal = document.getElementById("student-modal");
 const closeStudentModal = document.getElementById("close-student-modal");
 const studentForm = document.getElementById("student-form");
 const studentNameInput = document.getElementById("student-name");
+const studentClassesInput = document.getElementById("student-classes");
 const studentPriceInput = document.getElementById("student-price");
 const reportMonthInput = document.getElementById("report-month");
 const scheduleList = document.getElementById("schedule-list");
@@ -254,10 +255,15 @@ function renderToday() {
     const title = document.createElement("h3");
     title.textContent = student.name;
 
+    const classesBought = document.createElement("span");
+    classesBought.className = "student-classes";
+    classesBought.textContent = `Classes: ${student.classesBought ?? 0}`;
+
     const price = document.createElement("span");
     price.textContent = `${formatCurrency(student.hourlyPrice)}/hr`;
 
     header.appendChild(title);
+    header.appendChild(classesBought);
     header.appendChild(price);
 
     const checkboxLabel = document.createElement("label");
@@ -620,10 +626,11 @@ function deleteEntry(id) {
   renderAll();
 }
 
-function addStudent(name, price) {
+function addStudent(name, classesBought, price) {
   state.students.push({
     id: crypto.randomUUID(),
     name,
+    classesBought,
     hourlyPrice: price
   });
   saveState();
@@ -696,11 +703,12 @@ function setupListeners() {
   studentForm.addEventListener("submit", (event) => {
     event.preventDefault();
     const name = studentNameInput.value.trim();
+    const classesBought = Number.parseInt(studentClassesInput.value, 10);
     const price = Number.parseFloat(studentPriceInput.value);
-    if (!name || Number.isNaN(price) || price <= 0) {
+    if (!name || Number.isNaN(classesBought) || classesBought < 0 || Number.isNaN(price) || price <= 0) {
       return;
     }
-    addStudent(name, price);
+    addStudent(name, classesBought, price);
     closeModal();
   });
 
