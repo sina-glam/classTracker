@@ -70,7 +70,32 @@ function formatPriceList(prices) {
 }
 
 function toISODate(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseISODateLocal(value) {
+  if (!value) {
+    return null;
+  }
+  const [year, month, day] = value.split("-").map(Number);
+  if (!year || !month || !day) {
+    return null;
+  }
+  return new Date(year, month - 1, day);
+}
+
+function parseMonthValue(value) {
+  if (!value) {
+    return null;
+  }
+  const [year, month] = value.split("-").map(Number);
+  if (!year || !month) {
+    return null;
+  }
+  return new Date(year, month - 1, 1);
 }
 
 function openModal() {
@@ -176,7 +201,9 @@ function renderRecords() {
 
   recordsEmpty.style.display = "none";
 
-  const sortedEntries = [...state.entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedEntries = [...state.entries].sort(
+    (a, b) => parseISODateLocal(b.date) - parseISODateLocal(a.date)
+  );
 
   sortedEntries.forEach((entry) => {
     const row = document.createElement("tr");
@@ -185,7 +212,7 @@ function renderRecords() {
     studentCell.textContent = entry.studentName;
 
     const dateCell = document.createElement("td");
-    dateCell.textContent = formatDate(new Date(entry.date));
+    dateCell.textContent = formatDate(parseISODateLocal(entry.date));
 
     const hoursCell = document.createElement("td");
     hoursCell.className = "num";
@@ -220,13 +247,13 @@ function renderRecords() {
 function renderReports() {
   reportsTableBody.innerHTML = "";
   const monthValue = reportMonthInput.value;
-  const activeDate = monthValue ? new Date(`${monthValue}-01`) : new Date();
+  const activeDate = parseMonthValue(monthValue) || new Date();
 
   const monthStart = new Date(activeDate.getFullYear(), activeDate.getMonth(), 1);
   const monthEnd = new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, 1);
 
   const monthEntries = state.entries.filter((entry) => {
-    const date = new Date(entry.date);
+    const date = parseISODateLocal(entry.date);
     return date >= monthStart && date < monthEnd;
   });
 
@@ -302,12 +329,12 @@ function computeTotals(entries, monthStart, monthEnd, activeDate) {
   const clampEnd = (end) => (end > monthEnd ? monthEnd : end);
 
   const dayEntries = entries.filter((entry) => {
-    const date = new Date(entry.date);
+    const date = parseISODateLocal(entry.date);
     return date >= clampStart(dayStart) && date < clampEnd(dayEnd);
   });
 
   const weekEntries = entries.filter((entry) => {
-    const date = new Date(entry.date);
+    const date = parseISODateLocal(entry.date);
     return date >= clampStart(weekStart) && date < clampEnd(weekEnd);
   });
 
