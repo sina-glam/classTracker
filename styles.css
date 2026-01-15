@@ -313,6 +313,8 @@ select {
 
 .schedule-time {
   font-weight: 700;
+  display: block;
+  white-space: nowrap;
 }
 
 .schedule-name {
@@ -348,6 +350,7 @@ select {
   .schedule-item {
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
   }
 
   .schedule-actions {

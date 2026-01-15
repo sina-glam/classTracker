@@ -68,7 +68,7 @@ function formatDate(date) {
 }
 
 function formatCurrency(value) {
-  return `$${value.toFixed(2)}`;
+  return `¥${value.toFixed(2)}`;
 }
 
 function formatMonthLabel(date) {
