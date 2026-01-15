@@ -2,7 +2,8 @@ const storageKey = "tutorTrackerData";
 
 const state = {
   students: [],
-  entries: []
+  entries: [],
+  schedule: []
 };
 
 const tabs = document.querySelectorAll(".tab");
@@ -22,8 +23,21 @@ const studentForm = document.getElementById("student-form");
 const studentNameInput = document.getElementById("student-name");
 const studentPriceInput = document.getElementById("student-price");
 const reportMonthInput = document.getElementById("report-month");
+const scheduleList = document.getElementById("schedule-list");
+const scheduleEmpty = document.getElementById("schedule-empty");
+const openScheduleButton = document.getElementById("open-add-schedule");
+const scheduleModal = document.getElementById("schedule-modal");
+const closeScheduleModal = document.getElementById("close-schedule-modal");
+const scheduleForm = document.getElementById("schedule-form");
+const scheduleNameInput = document.getElementById("schedule-name");
+const scheduleDayInput = document.getElementById("schedule-day");
+const scheduleTimeInput = document.getElementById("schedule-time");
+const scheduleError = document.getElementById("schedule-error");
+const scheduleModalTitle = document.getElementById("schedule-modal-title");
+const scheduleSubmitButton = document.getElementById("schedule-submit");
 
 const todaySelections = new Map();
+let editingScheduleId = null;
 
 function loadState() {
   const raw = localStorage.getItem(storageKey);
@@ -34,6 +48,7 @@ function loadState() {
     const parsed = JSON.parse(raw);
     state.students = parsed.students || [];
     state.entries = parsed.entries || [];
+    state.schedule = parsed.schedule || [];
   } catch (error) {
     console.error("Failed to load data", error);
   }
@@ -108,6 +123,34 @@ function closeModal() {
   studentModal.classList.remove("is-open");
   studentModal.setAttribute("aria-hidden", "true");
   studentForm.reset();
+}
+
+function openScheduleModal(entry) {
+  scheduleModal.classList.add("is-open");
+  scheduleModal.setAttribute("aria-hidden", "false");
+  scheduleError.textContent = "";
+  if (entry) {
+    editingScheduleId = entry.id;
+    scheduleModalTitle.textContent = "Edit Class";
+    scheduleSubmitButton.textContent = "Update Class";
+    scheduleNameInput.value = entry.name;
+    scheduleDayInput.value = entry.day;
+    scheduleTimeInput.value = entry.time;
+  } else {
+    editingScheduleId = null;
+    scheduleModalTitle.textContent = "Add Class";
+    scheduleSubmitButton.textContent = "Save Class";
+    scheduleForm.reset();
+  }
+  scheduleNameInput.focus();
+}
+
+function closeScheduleModal() {
+  scheduleModal.classList.remove("is-open");
+  scheduleModal.setAttribute("aria-hidden", "true");
+  scheduleForm.reset();
+  scheduleError.textContent = "";
+  editingScheduleId = null;
 }
 
 function setActiveTab(tabId) {
@@ -315,6 +358,90 @@ function renderReports() {
   });
 }
 
+function renderSchedule() {
+  scheduleList.innerHTML = "";
+  const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday"
+  ];
+
+  scheduleEmpty.style.display = state.schedule.length ? "none" : "block";
+
+  const grouped = new Map();
+  days.forEach((day) => grouped.set(day, []));
+  state.schedule.forEach((entry) => {
+    if (!grouped.has(entry.day)) {
+      grouped.set(entry.day, []);
+    }
+    grouped.get(entry.day).push(entry);
+  });
+
+  days.forEach((day) => {
+    const dayCard = document.createElement("div");
+    dayCard.className = "schedule-day";
+
+    const header = document.createElement("div");
+    header.className = "schedule-day-header";
+    header.textContent = day;
+    dayCard.appendChild(header);
+
+    const items = document.createElement("div");
+    items.className = "schedule-items";
+
+    const entries = grouped.get(day).sort((a, b) => a.time.localeCompare(b.time));
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "muted schedule-empty-day";
+      empty.textContent = "No classes";
+      items.appendChild(empty);
+    } else {
+      entries.forEach((entry) => {
+        const item = document.createElement("div");
+        item.className = "schedule-item";
+
+        const time = document.createElement("span");
+        time.className = "schedule-time";
+        time.textContent = entry.time;
+
+        const name = document.createElement("span");
+        name.className = "schedule-name";
+        name.textContent = entry.name;
+
+        const actions = document.createElement("div");
+        actions.className = "schedule-actions";
+
+        const editButton = document.createElement("button");
+        editButton.type = "button";
+        editButton.className = "ghost";
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => openScheduleModal(entry));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "delete-btn";
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", () => deleteScheduleEntry(entry.id));
+
+        actions.appendChild(editButton);
+        actions.appendChild(deleteButton);
+
+        item.appendChild(time);
+        item.appendChild(name);
+        item.appendChild(actions);
+        items.appendChild(item);
+      });
+    }
+
+    dayCard.appendChild(items);
+    scheduleList.appendChild(dayCard);
+  });
+}
+
 function computeTotals(entries, monthStart, monthEnd, activeDate) {
   const dayStart = new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate());
   const dayEnd = new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate() + 1);
@@ -426,10 +553,55 @@ function addStudent(name, price) {
   renderAll();
 }
 
+function addScheduleEntry(name, day, time) {
+  const duplicate = state.schedule.some(
+    (entry) => entry.day === day && entry.time === time && entry.id !== editingScheduleId
+  );
+  if (duplicate) {
+    scheduleError.textContent = "That time slot already has a class.";
+    return;
+  }
+
+  if (editingScheduleId) {
+    const target = state.schedule.find((entry) => entry.id === editingScheduleId);
+    if (!target) {
+      scheduleError.textContent = "Unable to find that class to update.";
+      return;
+    }
+    target.name = name;
+    target.day = day;
+    target.time = time;
+  } else {
+    state.schedule.push({
+      id: crypto.randomUUID(),
+      name,
+      day,
+      time
+    });
+  }
+  saveState();
+  renderAll();
+  closeScheduleModal();
+}
+
+function deleteScheduleEntry(id) {
+  if (!window.confirm("Delete this scheduled class?")) {
+    return;
+  }
+  const index = state.schedule.findIndex((entry) => entry.id === id);
+  if (index === -1) {
+    return;
+  }
+  state.schedule.splice(index, 1);
+  saveState();
+  renderAll();
+}
+
 function renderAll() {
   renderToday();
   renderRecords();
   renderReports();
+  renderSchedule();
 }
 
 function setupListeners() {
@@ -451,6 +623,22 @@ function setupListeners() {
     }
     addStudent(name, price);
     closeModal();
+  });
+
+  openScheduleButton.addEventListener("click", openScheduleModal);
+  closeScheduleModal.addEventListener("click", closeScheduleModal);
+
+  scheduleForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = scheduleNameInput.value.trim();
+    const day = scheduleDayInput.value;
+    const time = scheduleTimeInput.value;
+    if (!name || !day || !time) {
+      scheduleError.textContent = "Please fill out every field.";
+      return;
+    }
+    scheduleError.textContent = "";
+    addScheduleEntry(name, day, time);
   });
 
   reportMonthInput.addEventListener("change", renderReports);

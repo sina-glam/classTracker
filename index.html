@@ -16,6 +16,7 @@
       <button class="tab is-active" data-tab="today" role="tab" aria-selected="true">Today</button>
       <button class="tab" data-tab="records" role="tab" aria-selected="false">Records</button>
       <button class="tab" data-tab="reports" role="tab" aria-selected="false">Reports</button>
+      <button class="tab" data-tab="schedule" role="tab" aria-selected="false">Schedule</button>
     </nav>
   </header>
 
@@ -103,6 +104,23 @@
         </table>
       </div>
     </section>
+
+    <section id="schedule" class="tab-panel" role="tabpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Weekly Schedule</h2>
+          <p class="muted">Monday to Sunday lineup.</p>
+        </div>
+        <button class="primary" id="open-add-schedule">Add Class</button>
+      </div>
+
+      <div id="schedule-empty" class="empty-state">
+        <h3>No classes yet</h3>
+        <p>Add a class to see your weekly schedule.</p>
+      </div>
+
+      <div id="schedule-list" class="schedule-list"></div>
+    </section>
   </main>
 
   <div class="modal" id="student-modal" aria-hidden="true">
@@ -121,6 +139,39 @@
           <input type="number" id="student-price" min="0" step="0.01" required />
         </label>
         <button class="primary" type="submit">Save Student</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal" id="schedule-modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="schedule-modal-title">Add Class</h3>
+        <button class="ghost" id="close-schedule-modal">Close</button>
+      </div>
+      <form id="schedule-form">
+        <label>
+          Student Name
+          <input type="text" id="schedule-name" required />
+        </label>
+        <label>
+          Day
+          <select id="schedule-day" required>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
+          </select>
+        </label>
+        <label>
+          Time
+          <input type="time" id="schedule-time" required />
+        </label>
+        <p class="form-error" id="schedule-error"></p>
+        <button class="primary" id="schedule-submit" type="submit">Save Class</button>
       </form>
     </div>
   </div>

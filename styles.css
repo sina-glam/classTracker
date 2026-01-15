@@ -268,10 +268,71 @@ form label {
 }
 
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+input[type="time"],
+select {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 10px;
+}
+
+.schedule-list {
+  display: grid;
+  gap: 12px;
+}
+
+.schedule-day {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.schedule-day-header {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.schedule-items {
+  display: grid;
+  gap: 8px;
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fef9f4;
+  border: 1px solid var(--line);
+  gap: 12px;
+}
+
+.schedule-time {
+  font-weight: 700;
+}
+
+.schedule-name {
+  color: var(--muted);
+}
+
+.schedule-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.schedule-empty-day {
+  font-style: italic;
+}
+
+.form-error {
+  color: #c0392b;
+  font-size: 13px;
+  min-height: 18px;
 }
 
 @media (max-width: 720px) {
