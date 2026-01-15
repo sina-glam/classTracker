@@ -229,9 +229,14 @@ function renderToday() {
       hourPicker.appendChild(button);
     });
 
+    const controls = document.createElement("div");
+    controls.className = "today-controls";
+
+    controls.appendChild(hourPicker);
+    controls.appendChild(checkboxLabel);
+
     card.appendChild(header);
-    card.appendChild(checkboxLabel);
-    card.appendChild(hourPicker);
+    card.appendChild(controls);
 
     todayList.appendChild(card);
   });

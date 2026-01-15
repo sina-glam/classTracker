@@ -147,6 +147,20 @@ body {
   flex-wrap: wrap;
 }
 
+.today-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .hour-picker button {
   border: 1px solid var(--line);
   background: #fff;
@@ -388,6 +402,18 @@ select {
 
   .schedule-item::-webkit-scrollbar {
     display: none;
+  }
+
+  .today-controls {
+    flex-wrap: nowrap;
+  }
+
+  .hour-picker {
+    flex: 1 1 auto;
+  }
+
+  .checkbox-row {
+    flex: 0 0 auto;
   }
 }
 
