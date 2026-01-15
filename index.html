@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tutor Class Tracker</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <h1>Tutor Class Tracker</h1>
+      <p class="subtitle">Offline-first, fast, minimal.</p>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="today" role="tab" aria-selected="true">Today</button>
+      <button class="tab" data-tab="records" role="tab" aria-selected="false">Records</button>
+      <button class="tab" data-tab="reports" role="tab" aria-selected="false">Reports</button>
+    </nav>
+  </header>
+
+  <main class="app-content">
+    <section id="today" class="tab-panel is-active" role="tabpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Daily Class Tracking</h2>
+          <p class="muted">Check students, select hours, confirm once.</p>
+        </div>
+        <button class="primary" id="open-add-student">Add Student</button>
+      </div>
+
+      <div id="today-empty" class="empty-state">
+        <h3>No students yet</h3>
+        <p>Add a student to start tracking today.</p>
+      </div>
+
+      <div id="today-list" class="card-stack"></div>
+
+      <div class="confirm-bar">
+        <button class="primary" id="confirm-today">Confirm Today</button>
+        <p class="muted" id="confirm-message"></p>
+      </div>
+    </section>
+
+    <section id="records" class="tab-panel" role="tabpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Records</h2>
+          <p class="muted">Scroll through every class entry.</p>
+        </div>
+      </div>
+
+      <div id="records-empty" class="empty-state">
+        <h3>No records yet</h3>
+        <p>Log classes on the Today tab and they will show here.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="records-table" id="records-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Date</th>
+              <th class="num">Hours</th>
+              <th class="num">Price</th>
+              <th class="num">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reports" class="tab-panel" role="tabpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Monthly Reports</h2>
+          <p class="muted">Summaries per student and totals.</p>
+        </div>
+        <div class="month-picker">
+          <label for="report-month">Month</label>
+          <input type="month" id="report-month" />
+        </div>
+      </div>
+
+      <div id="reports-empty" class="empty-state">
+        <h3>No report data</h3>
+        <p>Once you log classes, monthly summaries will appear here.</p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="reports-table" id="reports-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th class="num">Hours</th>
+              <th class="num">Price(s)</th>
+              <th class="num">Total</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="student-modal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Student</h3>
+        <button class="ghost" id="close-student-modal">Close</button>
+      </div>
+      <form id="student-form">
+        <label>
+          Student Name
+          <input type="text" id="student-name" required />
+        </label>
+        <label>
+          Hourly Price
+          <input type="number" id="student-price" min="0" step="0.01" required />
+        </label>
+        <button class="primary" type="submit">Save Student</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
