@@ -216,10 +216,11 @@ function renderToday() {
 
     const hourPicker = document.createElement("div");
     hourPicker.className = "hour-picker";
-    [1, 2].forEach((hours) => {
+    [1, 1.5, 2].forEach((hours) => {
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = `${hours}h`;
+      const label = hours % 1 === 0 ? String(hours) : String(hours).replace(".5", ".5");
+      button.textContent = `${label}h`;
       button.classList.toggle("is-active", selection.hours === hours);
       button.addEventListener("click", () => {
         selection.hours = hours;
