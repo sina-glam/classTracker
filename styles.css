@@ -348,13 +348,27 @@ select {
   }
 
   .schedule-item {
-    flex-direction: column;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
     width: 100%;
+    padding: 8px 10px;
+  }
+
+  .schedule-time {
+    font-size: 12px;
+  }
+
+  .schedule-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .schedule-actions {
-    align-self: flex-end;
+    gap: 6px;
   }
 }
 
