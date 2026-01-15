@@ -32,6 +32,7 @@ const scheduleForm = document.getElementById("schedule-form");
 const scheduleNameInput = document.getElementById("schedule-name");
 const scheduleDayInput = document.getElementById("schedule-day");
 const scheduleTimeInput = document.getElementById("schedule-time");
+const scheduleEndTimeInput = document.getElementById("schedule-end-time");
 const scheduleError = document.getElementById("schedule-error");
 const scheduleModalTitle = document.getElementById("schedule-modal-title");
 const scheduleSubmitButton = document.getElementById("schedule-submit");
@@ -136,6 +137,7 @@ function openScheduleModal(entry) {
     scheduleNameInput.value = entry.name;
     scheduleDayInput.value = entry.day;
     scheduleTimeInput.value = entry.time;
+    scheduleEndTimeInput.value = entry.endTime || "";
   } else {
     editingScheduleId = null;
     scheduleModalTitle.textContent = "Add Class";
@@ -406,7 +408,7 @@ function renderSchedule() {
 
         const time = document.createElement("span");
         time.className = "schedule-time";
-        time.textContent = entry.time;
+        time.textContent = entry.endTime ? `${entry.time} - ${entry.endTime}` : entry.time;
 
         const name = document.createElement("span");
         name.className = "schedule-name";
@@ -553,7 +555,7 @@ function addStudent(name, price) {
   renderAll();
 }
 
-function addScheduleEntry(name, day, time) {
+function addScheduleEntry(name, day, time, endTime) {
   const duplicate = state.schedule.some(
     (entry) => entry.day === day && entry.time === time && entry.id !== editingScheduleId
   );
@@ -571,12 +573,14 @@ function addScheduleEntry(name, day, time) {
     target.name = name;
     target.day = day;
     target.time = time;
+    target.endTime = endTime;
   } else {
     state.schedule.push({
       id: crypto.randomUUID(),
       name,
       day,
-      time
+      time,
+      endTime
     });
   }
   saveState();
@@ -633,12 +637,17 @@ function setupListeners() {
     const name = scheduleNameInput.value.trim();
     const day = scheduleDayInput.value;
     const time = scheduleTimeInput.value;
-    if (!name || !day || !time) {
+    const endTime = scheduleEndTimeInput.value;
+    if (!name || !day || !time || !endTime) {
       scheduleError.textContent = "Please fill out every field.";
       return;
     }
+    if (endTime <= time) {
+      scheduleError.textContent = "End time must be later than start time.";
+      return;
+    }
     scheduleError.textContent = "";
-    addScheduleEntry(name, day, time);
+    addScheduleEntry(name, day, time, endTime);
   });
 
   reportMonthInput.addEventListener("change", renderReports);
