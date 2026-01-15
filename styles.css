@@ -344,6 +344,15 @@ select {
   .app-content {
     padding: 16px;
   }
+
+  .schedule-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .schedule-actions {
+    align-self: flex-end;
+  }
 }
 
 @keyframes fadeIn {
