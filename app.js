@@ -27,7 +27,7 @@ const scheduleList = document.getElementById("schedule-list");
 const scheduleEmpty = document.getElementById("schedule-empty");
 const openScheduleButton = document.getElementById("open-add-schedule");
 const scheduleModal = document.getElementById("schedule-modal");
-const closeScheduleModal = document.getElementById("close-schedule-modal");
+const closeScheduleModalButton = document.getElementById("close-schedule-modal");
 const scheduleForm = document.getElementById("schedule-form");
 const scheduleNameInput = document.getElementById("schedule-name");
 const scheduleDayInput = document.getElementById("schedule-day");
@@ -626,7 +626,7 @@ function setupListeners() {
   });
 
   openScheduleButton.addEventListener("click", openScheduleModal);
-  closeScheduleModal.addEventListener("click", closeScheduleModal);
+  closeScheduleModalButton.addEventListener("click", closeScheduleModal);
 
   scheduleForm.addEventListener("submit", (event) => {
     event.preventDefault();
