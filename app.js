@@ -404,6 +404,9 @@ function confirmToday() {
 }
 
 function deleteEntry(id) {
+  if (!window.confirm("Delete this record?")) {
+    return;
+  }
   const index = state.entries.findIndex((entry) => entry.id === id);
   if (index === -1) {
     return;
