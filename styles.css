@@ -284,6 +284,15 @@ body {
   word-break: break-word;
 }
 
+.note-edit {
+  font-size: 0.8em;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 6px;
+}
+
 .note-text.is-done {
   text-decoration: line-through;
   color: var(--muted);

@@ -619,6 +619,7 @@ function renderNotes() {
     if (note.done) {
       text.classList.add("is-done");
     }
+    text.addEventListener("click", () => startNoteEdit(note, text));
 
     content.appendChild(checkbox);
     content.appendChild(text);
@@ -841,6 +842,36 @@ function addNote(text) {
   });
   saveState();
   renderNotes();
+}
+
+function startNoteEdit(note, textElement) {
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "note-edit";
+  input.value = note.text;
+  textElement.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const finish = (shouldSave) => {
+    const value = input.value.trim();
+    if (shouldSave && value) {
+      note.text = value;
+      saveState();
+    }
+    renderNotes();
+  };
+
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      finish(true);
+    }
+    if (event.key === "Escape") {
+      finish(false);
+    }
+  });
+
+  input.addEventListener("blur", () => finish(true));
 }
 
 function confirmDeleteNote(id) {
