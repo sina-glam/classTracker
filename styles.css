@@ -141,6 +141,35 @@ body {
   color: var(--muted);
 }
 
+.student-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-btn {
+  border: none;
+  background: none;
+  color: var(--accent-dark);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  display: block;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .student-classes {
   font-size: 14px;
   color: var(--muted);
@@ -238,6 +267,13 @@ body {
   color: #c0392b;
   font-weight: 600;
   cursor: pointer;
+}
+
+.delete-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  display: block;
 }
 
 .month-picker {

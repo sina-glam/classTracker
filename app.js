@@ -23,6 +23,14 @@ const studentForm = document.getElementById("student-form");
 const studentNameInput = document.getElementById("student-name");
 const studentClassesInput = document.getElementById("student-classes");
 const studentPriceInput = document.getElementById("student-price");
+const editStudentModal = document.getElementById("edit-student-modal");
+const closeEditStudentModalButton = document.getElementById("close-edit-student");
+const editStudentForm = document.getElementById("edit-student-form");
+const editStudentNameInput = document.getElementById("edit-student-name");
+const editStudentClassesInput = document.getElementById("edit-student-classes");
+const editStudentPriceInput = document.getElementById("edit-student-price");
+const editStudentError = document.getElementById("edit-student-error");
+const deleteStudentButton = document.getElementById("delete-student");
 const reportMonthInput = document.getElementById("report-month");
 const scheduleList = document.getElementById("schedule-list");
 const scheduleEmpty = document.getElementById("schedule-empty");
@@ -51,6 +59,7 @@ const recordSubmitButton = document.getElementById("record-submit");
 const todaySelections = new Map();
 let editingScheduleId = null;
 let editingEntryId = null;
+let editingStudentId = null;
 
 function loadState() {
   const raw = localStorage.getItem(storageKey);
@@ -144,6 +153,25 @@ function closeModal() {
   studentModal.classList.remove("is-open");
   studentModal.setAttribute("aria-hidden", "true");
   studentForm.reset();
+}
+
+function openEditStudentModal(student) {
+  editingStudentId = student.id;
+  editStudentNameInput.value = student.name;
+  editStudentClassesInput.value = student.classesBought ?? 0;
+  editStudentPriceInput.value = student.hourlyPrice ?? 0;
+  editStudentError.textContent = "";
+  editStudentModal.classList.add("is-open");
+  editStudentModal.setAttribute("aria-hidden", "false");
+  editStudentNameInput.focus();
+}
+
+function closeEditStudentModal() {
+  editStudentModal.classList.remove("is-open");
+  editStudentModal.setAttribute("aria-hidden", "true");
+  editStudentForm.reset();
+  editStudentError.textContent = "";
+  editingStudentId = null;
 }
 
 function openScheduleModal(entry) {
@@ -263,6 +291,22 @@ function renderToday() {
     const title = document.createElement("h3");
     title.textContent = student.name;
 
+    const titleRow = document.createElement("div");
+    titleRow.className = "student-title-row";
+    titleRow.appendChild(title);
+
+    const editButton = document.createElement("button");
+    editButton.type = "button";
+    editButton.className = "icon-btn";
+    editButton.innerHTML = `
+      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+        <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.17.31c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.31-.17a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.17-.31a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.31.17a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.93 2.93 0 1 1 0-5.86 2.93 2.93 0 0 1 0 5.86z"/>
+      </svg>
+    `;
+    editButton.setAttribute("aria-label", `Edit ${student.name}`);
+    editButton.addEventListener("click", () => openEditStudentModal(student));
+    titleRow.appendChild(editButton);
+
     const classesBought = document.createElement("span");
     classesBought.className = "student-classes";
     const totalClasses = Number.isFinite(student.classesBought) ? student.classesBought : 0;
@@ -274,7 +318,7 @@ function renderToday() {
     const price = document.createElement("span");
     price.textContent = `${formatCurrency(student.hourlyPrice)}/hr`;
 
-    header.appendChild(title);
+    header.appendChild(titleRow);
     header.appendChild(classesBought);
     header.appendChild(price);
 
@@ -653,6 +697,40 @@ function addStudent(name, classesBought, price) {
   renderAll();
 }
 
+function updateStudent(id, name, classesBought, price) {
+  const student = state.students.find((entry) => entry.id === id);
+  if (!student) {
+    return false;
+  }
+  const totalBefore = Number.isFinite(student.classesBought) ? student.classesBought : 0;
+  const remainingBefore = Number.isFinite(student.classesRemaining)
+    ? student.classesRemaining
+    : totalBefore;
+  const usedClasses = Math.max(0, totalBefore - remainingBefore);
+
+  student.name = name;
+  student.classesBought = classesBought;
+  student.classesRemaining = Math.max(0, classesBought - usedClasses);
+  student.hourlyPrice = price;
+
+  state.entries.forEach((entry) => {
+    if (entry.studentId === student.id) {
+      entry.studentName = name;
+    }
+  });
+  return true;
+}
+
+function deleteStudent(id) {
+  const index = state.students.findIndex((entry) => entry.id === id);
+  if (index === -1) {
+    return false;
+  }
+  state.students.splice(index, 1);
+  todaySelections.delete(id);
+  return true;
+}
+
 function addScheduleEntry(name, day, time, endTime) {
   const duplicate = state.schedule.some(
     (entry) => entry.day === day && entry.time === time && entry.id !== editingScheduleId
@@ -715,6 +793,7 @@ function setupListeners() {
 
   addStudentButton.addEventListener("click", openModal);
   closeStudentModal.addEventListener("click", closeModal);
+  closeEditStudentModalButton.addEventListener("click", closeEditStudentModal);
 
   studentForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -726,6 +805,43 @@ function setupListeners() {
     }
     addStudent(name, classesBought, price);
     closeModal();
+  });
+
+  editStudentForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (!editingStudentId) {
+      return;
+    }
+    const name = editStudentNameInput.value.trim();
+    const classesBought = Number.parseInt(editStudentClassesInput.value, 10);
+    const price = Number.parseFloat(editStudentPriceInput.value);
+    if (!name || Number.isNaN(classesBought) || classesBought < 0 || Number.isNaN(price) || price <= 0) {
+      editStudentError.textContent = "Please fill out every field with valid values.";
+      return;
+    }
+    if (!updateStudent(editingStudentId, name, classesBought, price)) {
+      editStudentError.textContent = "Unable to find that student to update.";
+      return;
+    }
+    saveState();
+    renderAll();
+    closeEditStudentModal();
+  });
+
+  deleteStudentButton.addEventListener("click", () => {
+    if (!editingStudentId) {
+      return;
+    }
+    if (!window.confirm("Delete this student?")) {
+      return;
+    }
+    if (!deleteStudent(editingStudentId)) {
+      editStudentError.textContent = "Unable to find that student to delete.";
+      return;
+    }
+    saveState();
+    renderAll();
+    closeEditStudentModal();
   });
 
   openScheduleButton.addEventListener("click", openScheduleModal);
