@@ -261,10 +261,10 @@ body {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 12px 16px;
+  padding: 7px 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   transition: transform 0.2s ease;
   overflow: hidden;
 }
@@ -272,12 +272,13 @@ body {
 .note-content {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
 }
 
 .note-text {
+  font-size: 0.8em;
   flex: 1;
   min-width: 0;
   word-break: break-word;
