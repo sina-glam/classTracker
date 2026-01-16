@@ -17,6 +17,7 @@
       <button class="tab" data-tab="records" role="tab" aria-selected="false">Records</button>
       <button class="tab" data-tab="reports" role="tab" aria-selected="false">Reports</button>
       <button class="tab" data-tab="schedule" role="tab" aria-selected="false">Schedule</button>
+      <button class="tab" data-tab="notes" role="tab" aria-selected="false">Notes</button>
     </nav>
   </header>
 
@@ -40,7 +41,7 @@
       <div class="confirm-bar">
         <button class="primary" id="confirm-today">Confirm Today</button>
         <p class="muted" id="confirm-message"></p>
-        <p class="muted footer-note">Bocanni ltd. 2026 v1.3</p>
+        <p class="muted footer-note">Bocanni ltd. 2026 v1.4</p>
       </div>
     </section>
 
@@ -121,6 +122,27 @@
       </div>
 
       <div id="schedule-list" class="schedule-list"></div>
+    </section>
+
+    <section id="notes" class="tab-panel" role="tabpanel">
+      <div class="panel-header">
+        <div>
+          <h2>Notes</h2>
+          <p class="muted">Add reminders and check them off.</p>
+        </div>
+      </div>
+
+      <form id="note-form" class="note-form">
+        <input type="text" id="note-input" placeholder="New reminder..." required />
+        <button class="primary" type="submit">Add</button>
+      </form>
+
+      <div id="notes-empty" class="empty-state">
+        <h3>No reminders yet</h3>
+        <p>Add a note to keep track of tasks.</p>
+      </div>
+
+      <div id="notes-list" class="notes-list"></div>
     </section>
   </main>
 

@@ -3,7 +3,8 @@ const storageKey = "tutorTrackerData";
 const state = {
   students: [],
   entries: [],
-  schedule: []
+  schedule: [],
+  notes: []
 };
 
 const tabs = document.querySelectorAll(".tab");
@@ -55,6 +56,10 @@ const recordPriceInput = document.getElementById("record-price");
 const recordError = document.getElementById("record-error");
 const recordModalTitle = document.getElementById("record-modal-title");
 const recordSubmitButton = document.getElementById("record-submit");
+const noteForm = document.getElementById("note-form");
+const noteInput = document.getElementById("note-input");
+const notesList = document.getElementById("notes-list");
+const notesEmpty = document.getElementById("notes-empty");
 
 const todaySelections = new Map();
 let editingScheduleId = null;
@@ -71,6 +76,7 @@ function loadState() {
     state.students = parsed.students || [];
     state.entries = parsed.entries || [];
     state.schedule = parsed.schedule || [];
+    state.notes = parsed.notes || [];
     state.students.forEach((student) => {
       if (typeof student.classesBought !== "number") {
         student.classesBought = 0;
@@ -581,6 +587,56 @@ function renderSchedule() {
   });
 }
 
+function renderNotes() {
+  notesList.innerHTML = "";
+
+  if (!state.notes.length) {
+    notesEmpty.style.display = "block";
+    return;
+  }
+
+  notesEmpty.style.display = "none";
+
+  state.notes.forEach((note) => {
+    const item = document.createElement("div");
+    item.className = "note-item";
+
+    const content = document.createElement("div");
+    content.className = "note-content";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = Boolean(note.done);
+    checkbox.addEventListener("change", () => {
+      note.done = checkbox.checked;
+      saveState();
+      renderNotes();
+    });
+
+    const text = document.createElement("span");
+    text.className = "note-text";
+    text.textContent = note.text;
+    if (note.done) {
+      text.classList.add("is-done");
+    }
+
+    content.appendChild(checkbox);
+    content.appendChild(text);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "delete-btn note-delete";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => confirmDeleteNote(note.id));
+
+    item.appendChild(content);
+    item.appendChild(deleteButton);
+    attachSwipeHandlers(item, note.id);
+
+    notesList.appendChild(item);
+  });
+}
+
 function computeTotals(entries, monthStart, monthEnd, activeDate) {
   const dayStart = new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate());
   const dayEnd = new Date(activeDate.getFullYear(), activeDate.getMonth(), activeDate.getDate() + 1);
@@ -777,11 +833,105 @@ function deleteScheduleEntry(id) {
   renderAll();
 }
 
+function addNote(text) {
+  state.notes.unshift({
+    id: crypto.randomUUID(),
+    text,
+    done: false
+  });
+  saveState();
+  renderNotes();
+}
+
+function confirmDeleteNote(id) {
+  if (!window.confirm("Delete this reminder?")) {
+    return;
+  }
+  const index = state.notes.findIndex((note) => note.id === id);
+  if (index === -1) {
+    return;
+  }
+  state.notes.splice(index, 1);
+  saveState();
+  renderNotes();
+}
+
+function attachSwipeHandlers(item, noteId) {
+  let startX = 0;
+  let currentX = 0;
+  let dragging = false;
+
+  item.addEventListener("touchstart", (event) => {
+    if (event.touches.length !== 1) {
+      return;
+    }
+    startX = event.touches[0].clientX;
+    currentX = 0;
+    dragging = true;
+    item.classList.remove("show-delete");
+  });
+
+  item.addEventListener("touchmove", (event) => {
+    if (!dragging) {
+      return;
+    }
+    const deltaX = event.touches[0].clientX - startX;
+    if (deltaX > 0) {
+      currentX = 0;
+    } else {
+      currentX = Math.max(deltaX, -120);
+    }
+    item.style.transform = `translateX(${currentX}px)`;
+  });
+
+  item.addEventListener("touchend", () => {
+    dragging = false;
+    if (currentX <= -110) {
+      item.classList.remove("show-delete");
+      item.style.transform = "";
+      confirmDeleteNote(noteId);
+      return;
+    }
+    if (currentX <= -80) {
+      item.classList.add("show-delete");
+      item.style.transform = "translateX(-80px)";
+    } else {
+      item.classList.remove("show-delete");
+      item.style.transform = "";
+    }
+  });
+
+  item.addEventListener("touchcancel", () => {
+    dragging = false;
+    item.classList.remove("show-delete");
+    item.style.transform = "";
+  });
+
+  item.addEventListener("click", (event) => {
+    if (event.target.closest(".note-delete")) {
+      return;
+    }
+    const wasOpen = item.classList.contains("show-delete");
+    const openItems = notesList.querySelectorAll(".note-item.show-delete");
+    openItems.forEach((openItem) => {
+      if (openItem !== item) {
+        openItem.classList.remove("show-delete");
+        openItem.style.transform = "";
+      }
+    });
+    if (wasOpen) {
+      item.classList.remove("show-delete");
+      item.style.transform = "";
+    }
+  });
+}
+
 function renderAll() {
   renderToday();
   renderRecords();
   renderReports();
   renderSchedule();
+  renderNotes();
 }
 
 function setupListeners() {
@@ -907,6 +1057,16 @@ function setupListeners() {
     saveState();
     renderAll();
     closeRecordModal();
+  });
+
+  noteForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const text = noteInput.value.trim();
+    if (!text) {
+      return;
+    }
+    addNote(text);
+    noteForm.reset();
   });
 
   reportMonthInput.addEventListener("change", renderReports);

@@ -241,6 +241,67 @@ body {
   background: var(--panel);
 }
 
+.note-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.note-form input {
+  flex: 1;
+}
+
+.notes-list {
+  display: grid;
+  gap: 10px;
+}
+
+.note-item {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s ease;
+  overflow: hidden;
+}
+
+.note-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.note-text {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.note-text.is-done {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+
+.note-delete {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.note-item.show-delete .note-delete {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 .records-table,
 .reports-table {
   width: 100%;
