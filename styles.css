@@ -217,10 +217,12 @@ body {
 }
 
 .footer-note {
+  align-self: center;
   text-align: center;
   font-size: 12px;
-  opacity: 0.5;
+  opacity: 0.35;
   letter-spacing: 0.04em;
+  width: 100%;
 }
 
 .empty-state {
