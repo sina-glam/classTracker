@@ -322,7 +322,7 @@ function renderToday() {
     const remainingClasses = Number.isFinite(student.classesRemaining)
       ? student.classesRemaining
       : totalClasses;
-    classesBought.textContent = `${remainingClasses} of ${totalClasses}`;
+    classesBought.textContent = `${remainingClasses}/${totalClasses}`;
 
     const price = document.createElement("span");
     price.textContent = `${formatCurrency(student.hourlyPrice)}/hr`;
