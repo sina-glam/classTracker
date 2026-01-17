@@ -17,6 +17,7 @@ const reportsTableBody = document.querySelector("#reports-table tbody");
 const reportsEmpty = document.getElementById("reports-empty");
 const confirmButton = document.getElementById("confirm-today");
 const confirmMessage = document.getElementById("confirm-message");
+const confirmToast = document.getElementById("confirm-toast");
 const addStudentButton = document.getElementById("open-add-student");
 const studentModal = document.getElementById("student-modal");
 const closeStudentModal = document.getElementById("close-student-modal");
@@ -65,6 +66,7 @@ const todaySelections = new Map();
 let editingScheduleId = null;
 let editingEntryId = null;
 let editingStudentId = null;
+let confirmToastTimer = null;
 
 function loadState() {
   const raw = localStorage.getItem(storageKey);
@@ -720,6 +722,8 @@ function confirmToday() {
     confirmMessage.textContent = "Saved!";
   }
 
+  showConfirmToast("Confirmed");
+
   todaySelections.forEach((value) => {
     value.checked = false;
     value.hours = 1;
@@ -727,6 +731,20 @@ function confirmToday() {
 
   saveState();
   renderAll();
+}
+
+function showConfirmToast(message) {
+  if (!confirmToast) {
+    return;
+  }
+  confirmToast.textContent = message;
+  confirmToast.classList.add("is-visible");
+  if (confirmToastTimer) {
+    clearTimeout(confirmToastTimer);
+  }
+  confirmToastTimer = setTimeout(() => {
+    confirmToast.classList.remove("is-visible");
+  }, 2000);
 }
 
 function deleteEntry(id) {
