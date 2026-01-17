@@ -34,6 +34,7 @@ const editStudentPriceInput = document.getElementById("edit-student-price");
 const editStudentError = document.getElementById("edit-student-error");
 const deleteStudentButton = document.getElementById("delete-student");
 const reportMonthInput = document.getElementById("report-month");
+const reportStudentSelect = document.getElementById("report-student");
 const scheduleList = document.getElementById("schedule-list");
 const scheduleEmpty = document.getElementById("schedule-empty");
 const openScheduleButton = document.getElementById("open-add-schedule");
@@ -438,14 +439,20 @@ function renderReports() {
   reportsTableBody.innerHTML = "";
   const monthValue = reportMonthInput.value;
   const activeDate = parseMonthValue(monthValue) || new Date();
+  ensureReportStudentOptions();
+  const selectedStudentId = reportStudentSelect?.value || "all";
 
   const monthStart = new Date(activeDate.getFullYear(), activeDate.getMonth(), 1);
   const monthEnd = new Date(activeDate.getFullYear(), activeDate.getMonth() + 1, 1);
 
-  const monthEntries = state.entries.filter((entry) => {
+  let monthEntries = state.entries.filter((entry) => {
     const date = parseISODateLocal(entry.date);
     return date >= monthStart && date < monthEnd;
   });
+
+  if (selectedStudentId !== "all") {
+    monthEntries = monthEntries.filter((entry) => entry.studentId === selectedStudentId);
+  }
 
   if (!monthEntries.length) {
     reportsEmpty.style.display = "block";
@@ -475,23 +482,15 @@ function renderReports() {
   );
 
   const totals = computeTotals(monthEntries, monthStart, monthEnd, activeDate);
-  const totalsRows = [
-    { label: "TOTAL - Day", totals: totals.day },
-    { label: "TOTAL - Week", totals: totals.week },
-    { label: "TOTAL - Month", totals: totals.month }
-  ];
-
-  totalsRows.forEach((item) => {
-    const row = document.createElement("tr");
-    row.classList.add("summary-row");
-    row.innerHTML = `
-      <td>${item.label}</td>
-      <td class="num">${item.totals.hours}</td>
-      <td class="num">-</td>
-      <td class="num">${formatCurrency(item.totals.earnings)}</td>
-    `;
-    reportsTableBody.appendChild(row);
-  });
+  const totalRow = document.createElement("tr");
+  totalRow.classList.add("summary-row");
+  totalRow.innerHTML = `
+    <td>TOTAL - Month</td>
+    <td class="num">${totals.month.hours}</td>
+    <td class="num">-</td>
+    <td class="num">${formatCurrency(totals.month.earnings)}</td>
+  `;
+  reportsTableBody.appendChild(totalRow);
 
   summaryRows.forEach((entry) => {
     const row = document.createElement("tr");
@@ -503,6 +502,29 @@ function renderReports() {
     `;
     reportsTableBody.appendChild(row);
   });
+}
+
+function ensureReportStudentOptions() {
+  if (!reportStudentSelect) {
+    return;
+  }
+  const selected = reportStudentSelect.value || "all";
+  reportStudentSelect.innerHTML = "";
+
+  const allOption = document.createElement("option");
+  allOption.value = "all";
+  allOption.textContent = "All students";
+  reportStudentSelect.appendChild(allOption);
+
+  state.students.forEach((student) => {
+    const option = document.createElement("option");
+    option.value = student.id;
+    option.textContent = student.name;
+    reportStudentSelect.appendChild(option);
+  });
+
+  const hasSelection = state.students.some((student) => student.id === selected);
+  reportStudentSelect.value = hasSelection ? selected : "all";
 }
 
 function renderSchedule() {
@@ -1119,6 +1141,7 @@ function setupListeners() {
   });
 
   reportMonthInput.addEventListener("change", renderReports);
+  reportStudentSelect?.addEventListener("change", renderReports);
 }
 
 function init() {

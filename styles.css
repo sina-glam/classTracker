@@ -384,10 +384,24 @@ body {
   gap: 8px;
 }
 
+.report-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .month-picker input {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 6px 10px;
+}
+
+.month-picker select {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: #fff;
 }
 
 .modal {

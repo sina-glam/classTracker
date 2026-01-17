@@ -41,7 +41,7 @@
       <div class="confirm-bar">
         <button class="primary" id="confirm-today">Confirm Today</button>
         <p class="muted" id="confirm-message"></p>
-        <p class="muted footer-note">Bocanni ltd. 2026 v1.5</p>
+        <p class="muted footer-note">Bocanni ltd. 2026 v1.7</p>
       </div>
     </section>
 
@@ -81,9 +81,15 @@
           <h2>Monthly Reports</h2>
           <p class="muted">Summaries per student and totals.</p>
         </div>
-        <div class="month-picker">
-          <label for="report-month">Month</label>
-          <input type="month" id="report-month" />
+        <div class="report-controls">
+          <div class="month-picker">
+            <label for="report-month">Month</label>
+            <input type="month" id="report-month" />
+          </div>
+          <div class="month-picker">
+            <label for="report-student">Student</label>
+            <select id="report-student"></select>
+          </div>
         </div>
       </div>
 
