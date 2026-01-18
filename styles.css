@@ -92,7 +92,12 @@ body {
 }
 
 #today .footer-note {
-  font-size: 9px;
+  font-size: 15px;
+}
+
+#today .card {
+  padding: 12px;
+  gap: 8px;
 }
 
 .panel-header {

@@ -15,6 +15,7 @@ const recordsTableBody = document.querySelector("#records-table tbody");
 const recordsEmpty = document.getElementById("records-empty");
 const reportsTableBody = document.querySelector("#reports-table tbody");
 const reportsEmpty = document.getElementById("reports-empty");
+const recordsStudentSelect = document.getElementById("records-student");
 const confirmButton = document.getElementById("confirm-today");
 const confirmMessage = document.getElementById("confirm-message");
 const confirmToast = document.getElementById("confirm-toast");
@@ -374,15 +375,22 @@ function renderToday() {
 
 function renderRecords() {
   recordsTableBody.innerHTML = "";
+  ensureRecordsStudentOptions();
+  const selectedStudentId = recordsStudentSelect?.value || "all";
 
-  if (!state.entries.length) {
+  let visibleEntries = state.entries;
+  if (selectedStudentId !== "all") {
+    visibleEntries = visibleEntries.filter((entry) => entry.studentId === selectedStudentId);
+  }
+
+  if (!visibleEntries.length) {
     recordsEmpty.style.display = "block";
     return;
   }
 
   recordsEmpty.style.display = "none";
 
-  const sortedEntries = [...state.entries].sort(
+  const sortedEntries = [...visibleEntries].sort(
     (a, b) => parseISODateLocal(b.date) - parseISODateLocal(a.date)
   );
 
@@ -433,6 +441,29 @@ function renderRecords() {
 
     recordsTableBody.appendChild(row);
   });
+}
+
+function ensureRecordsStudentOptions() {
+  if (!recordsStudentSelect) {
+    return;
+  }
+  const selected = recordsStudentSelect.value || "all";
+  recordsStudentSelect.innerHTML = "";
+
+  const allOption = document.createElement("option");
+  allOption.value = "all";
+  allOption.textContent = "All students";
+  recordsStudentSelect.appendChild(allOption);
+
+  state.students.forEach((student) => {
+    const option = document.createElement("option");
+    option.value = student.id;
+    option.textContent = student.name;
+    recordsStudentSelect.appendChild(option);
+  });
+
+  const hasSelection = state.students.some((student) => student.id === selected);
+  recordsStudentSelect.value = hasSelection ? selected : "all";
 }
 
 function renderReports() {
@@ -1142,6 +1173,7 @@ function setupListeners() {
 
   reportMonthInput.addEventListener("change", renderReports);
   reportStudentSelect?.addEventListener("change", renderReports);
+  recordsStudentSelect?.addEventListener("change", renderRecords);
 }
 
 function init() {
