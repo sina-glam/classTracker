@@ -830,15 +830,10 @@ function updateStudent(id, name, classesBought, price) {
   if (!student) {
     return false;
   }
-  const totalBefore = Number.isFinite(student.classesBought) ? student.classesBought : 0;
-  const remainingBefore = Number.isFinite(student.classesRemaining)
-    ? student.classesRemaining
-    : totalBefore;
-  const usedClasses = Math.max(0, totalBefore - remainingBefore);
 
   student.name = name;
   student.classesBought = classesBought;
-  student.classesRemaining = Math.max(0, classesBought - usedClasses);
+  student.classesRemaining = classesBought;
   student.hourlyPrice = price;
 
   state.entries.forEach((entry) => {
