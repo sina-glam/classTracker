@@ -808,9 +808,22 @@ function deleteEntry(id) {
   if (index === -1) {
     return;
   }
-  state.entries.splice(index, 1);
+  const [deletedEntry] = state.entries.splice(index, 1);
+  restoreClassToStudent(deletedEntry.studentId);
   saveState();
   renderAll();
+}
+
+function restoreClassToStudent(studentId) {
+  const student = state.students.find((entry) => entry.id === studentId);
+  if (!student) {
+    return;
+  }
+  const totalClasses = Number.isFinite(student.classesBought) ? student.classesBought : 0;
+  const remainingClasses = Number.isFinite(student.classesRemaining)
+    ? student.classesRemaining
+    : totalClasses;
+  student.classesRemaining = Math.min(totalClasses, remainingClasses + 1);
 }
 
 function addStudent(name, classesBought, price) {
