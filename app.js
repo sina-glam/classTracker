@@ -736,20 +736,11 @@ function calculateTotals(entries) {
 
 function confirmToday() {
   const today = toISODate(new Date());
-  const duplicates = [];
+  let savedCount = 0;
 
   state.students.forEach((student) => {
     const selection = todaySelections.get(student.id);
     if (!selection?.checked) {
-      return;
-    }
-
-    const alreadyLogged = state.entries.some(
-      (entry) => entry.studentId === student.id && entry.date === today
-    );
-
-    if (alreadyLogged) {
-      duplicates.push(student.name);
       return;
     }
 
@@ -764,16 +755,13 @@ function confirmToday() {
     };
 
     state.entries.push(entry);
+    savedCount += 1;
     if (Number.isFinite(student.classesRemaining) && student.classesRemaining > 0) {
       student.classesRemaining -= 1;
     }
   });
 
-  if (duplicates.length) {
-    confirmMessage.textContent = `Already logged today: ${duplicates.join(", ")}`;
-  } else {
-    confirmMessage.textContent = "Saved!";
-  }
+  confirmMessage.textContent = savedCount ? "Saved!" : "Select at least one student.";
 
   showConfirmToast("Confirmed");
 
